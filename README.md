@@ -6,3 +6,6 @@ basic functionalities:
 - sends notifications
 
 To read there is a IAM service account role required and given read permissions to Google Sheet
+
+TODO:
+- modularize functions in Terraform
