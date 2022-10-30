@@ -8,7 +8,7 @@ package:
 	cd schedule_reader_function && zip -r ../schedule_reader_function.zip main.py requirements.txt
 	cd hole_finder_function && zip -r ../hole_finder_function.zip main.py requirements.txt
 	cd schedule_manager_function && zip -r ../schedule_manager_function.zip main.py requirements.txt
-
+	cd notifier_function && zip -r ../notifier_function.zip main.py requirements.txt
 
 apply: package
 	cd terraform && terraform apply -auto-approve -var-file="${workspace}.tfvars"
