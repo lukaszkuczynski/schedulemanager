@@ -1,4 +1,6 @@
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
-protobuf==3.20.1 
+protobuf==3.20.1
+functions-framework==3.*
+google-cloud-pubsub>=0.28.1

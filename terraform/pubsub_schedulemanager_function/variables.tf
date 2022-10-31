@@ -25,3 +25,7 @@ variable "manager_topic_name" {
 variable "google_project_name" {
   description = "project name (maybe to remove later with DataSource)"
 }
+
+variable "additional_variables" {
+  description = "map holding additional env variables for a Function"
+}

@@ -2,7 +2,7 @@
 resource "google_storage_bucket_object" "function_archive" {
   name   = var.archive_file_name
   bucket = var.function_storage_bucket
-  source = "../hole_finder_function.zip"
+  source = "../${var.archive_file_name}"
 }
 
 resource "google_cloudfunctions_function" "function" {
@@ -19,10 +19,8 @@ resource "google_cloudfunctions_function" "function" {
     resource   = var.trigger_pubsub_topic
   }
 
-  environment_variables = {
-    MANAGER_TOPIC_NAME   = var.manager_topic_name
-    GOOGLE_CLOUD_PROJECT = var.google_project_name
-  }
+  environment_variables = var.additional_variables
+
 
   depends_on = [
     google_storage_bucket_object.function_archive
