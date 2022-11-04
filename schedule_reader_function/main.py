@@ -26,6 +26,7 @@ def entrypoint(request):
     result = sheet.values().get(spreadsheetId=spreadsheet_id, range=range_str).execute()
     values_all = result.get("values", [])
     print(values_all)
+    call_the_manager(values_all)
     return str(len(values_all))
 
 

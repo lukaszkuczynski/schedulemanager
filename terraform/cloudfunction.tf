@@ -1,6 +1,6 @@
 resource "google_storage_bucket" "function_storage_bucket" {
   name     = "${var.app_name}-${terraform.workspace}"
-  location = "${var.region}"
+  location = var.region
 }
 
 resource "google_storage_bucket_object" "schedule_reader_archive" {
@@ -25,8 +25,10 @@ resource "google_cloudfunctions_function" "schedule_reader_function" {
   ]
 
   environment_variables = {
-    SPREADSHEET_ID      = var.spreadsheet_id
-    SHEET_RANGE         = var.sheet_range
+    SPREADSHEET_ID       = var.spreadsheet_id
+    SHEET_RANGE          = var.sheet_range
+    MANAGER_TOPIC_NAME   = google_pubsub_topic.manager_topic.name
+    GOOGLE_CLOUD_PROJECT = var.google_project_name
   }
 }
 

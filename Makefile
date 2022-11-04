@@ -20,7 +20,7 @@ taint2:
 	cd terraform && terraform taint google_cloudfunctions_function.function2
 
 logs:
-	gcloud functions logs read  schedule-reader-default --limit 10
+	gcloud functions logs read  schedule-manager-default --limit 10 --start-time '2022-11-03' 
 
 state:
 	cd terraform && terraform state list

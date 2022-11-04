@@ -1,4 +1,3 @@
-from sched import scheduler
 import functions_framework
 from google.cloud import pubsub_v1
 import os
@@ -40,7 +39,9 @@ def entrypoint(manager_event):
     print(
         f"Received event with ID: {manager_event['id']} and data {manager_event.data}"
     )
-    data_parsed = base64.b64decode(manager_event["data"]).decode("utf-8")
+    data_parsed = json.loads(
+        base64.b64decode(manager_event.data["message"]["data"]).decode()
+    )
     print(data_parsed)
     caller = data_parsed.get("caller")
     if caller == "schedule_reader":
