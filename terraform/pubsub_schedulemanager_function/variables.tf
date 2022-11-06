@@ -8,6 +8,7 @@ variable "function_name" {
 
 variable "entrypoint" {
   description = "entrypoint of a CloudFunction"
+  default     = "entrypoint"
 }
 
 variable "trigger_pubsub_topic" {
@@ -28,4 +29,19 @@ variable "google_project_name" {
 
 variable "additional_variables" {
   description = "map holding additional env variables for a Function"
+}
+
+variable "available_memory_mb" {
+  description = "How much memory is available for the Function"
+  default     = 256
+}
+
+variable "spreadsheet_id" {
+  description = "Google Sheets spreadsheet id to read schedule by a reader"
+  default     = ""
+}
+
+variable "sheet_range" {
+  description = "Sheet range of a Google Sheet with the schedule"
+  default     = ""
 }

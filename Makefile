@@ -24,3 +24,6 @@ logs:
 
 state:
 	cd terraform && terraform state list
+
+destroy:
+	cd terraform && terraform destroy

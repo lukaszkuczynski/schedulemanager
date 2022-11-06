@@ -6,6 +6,8 @@ import json
 from googleapiclient.discovery import build
 import google.auth
 from google.cloud import pubsub_v1
+import functions_framework
+
 
 publisher = pubsub_v1.PublisherClient()
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
@@ -13,6 +15,7 @@ MANAGER_TOPIC_NAME = os.getenv("MANAGER_TOPIC_NAME")
 THIS_FUNCTION_CALLER_ID = "schedule_reader"  # envvar it!
 
 
+@functions_framework.cloud_event
 def entrypoint(request):
     credentials, project_id = google.auth.default(
         scopes=["https://www.googleapis.com/auth/spreadsheets"]

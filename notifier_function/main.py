@@ -1,5 +1,3 @@
-from cgitb import reset
-from unittest.mock import call
 import functions_framework
 import base64
 import os
