@@ -54,3 +54,5 @@ def entrypoint(manager_event):
     elif caller == "hole_finder":
         response = process_acc_to_the_caller(caller, message)
         send_to_topic(NOTIFIER_TOPIC_NAME, response)
+    else:
+        print(f"no caller identified : {caller}")

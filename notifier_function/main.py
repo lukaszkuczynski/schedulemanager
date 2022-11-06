@@ -19,7 +19,7 @@ def entrypoint(nofifier_event):
     decoded = base64.b64decode(nofifier_event.data["message"]["data"]).decode()
     print("Hello, " + decoded + "!")
     print(decoded)
-    call_the_manager(send_notifications())
+    # call_the_manager(send_notifications())
 
 
 def call_the_manager(response):

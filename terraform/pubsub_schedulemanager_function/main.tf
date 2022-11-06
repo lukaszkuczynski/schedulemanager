@@ -12,6 +12,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_bucket = var.function_storage_bucket
   source_archive_object = google_storage_bucket_object.function_archive.name
   entry_point           = var.entrypoint
+  max_instances         = 1
 
 
   event_trigger {
