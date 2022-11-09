@@ -55,7 +55,7 @@ class SheetShiftsParser:
         small_dataframes = self.__parse_oneday_dataframes(df, corners, one_day_shape)
         entries = self.__get_entries(small_dataframes)
         to_send_list = [
-            "-".join([dt_tuple[0].strftime("%Y-%m-%d %H:%M"), str(dt_tuple[1])])
+            "__".join([dt_tuple[0].strftime("%Y-%m-%d %H:%M"), str(dt_tuple[1])])
             for dt_tuple in entries
             if dt_tuple[1]
         ]

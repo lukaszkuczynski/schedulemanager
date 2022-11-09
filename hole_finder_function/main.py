@@ -1,9 +1,9 @@
-from subprocess import call
 import functions_framework
 import base64
 from google.cloud import pubsub_v1
 import os
 import json
+from hole_detector import HoleDetector, QuestionMarksStrategy
 
 publisher = pubsub_v1.PublisherClient()
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
@@ -17,18 +17,22 @@ def entrypoint(schedule_cloud_event):
         f"Received event with ID: {schedule_cloud_event['id']} and data {schedule_cloud_event.data}"
     )
     print("decoding")
-    decoded = base64.b64decode(schedule_cloud_event.data["message"]["data"]).decode()
-    print("Hello, " + decoded + "!")
-    print(decoded)
-    call_the_manager(get_holes())
+    decoded_msg = json.loads(
+        base64.b64decode(schedule_cloud_event.data["message"]["data"]).decode()
+    )
+    print("Received this msg:")
+    print(decoded_msg)
+    decoded_events = decoded_msg["data"]["message"]
+    print("and received these events:")
+    print(decoded_events)
+    holes = HoleDetector(QuestionMarksStrategy()).detect_holes(decoded_events)
+    call_the_manager(holes)
 
 
 def call_the_manager(response):
     topic_path = publisher.topic_path(PROJECT_ID, MANAGER_TOPIC_NAME)
     message_json = json.dumps(
-        {
-            "data": {"message": response, "caller": THIS_FUNCTION_CALLER_ID},
-        }
+        {"data": {"message": response, "caller": THIS_FUNCTION_CALLER_ID},}
     )
     message_bytes = message_json.encode("utf-8")
     try:
@@ -38,10 +42,3 @@ def call_the_manager(response):
     except Exception as e:
         print(e)
         return (e, 500)
-
-
-def get_holes():
-    return [
-        {"date": "2022-01-01", "person": "Adam"},
-        {"date": "2022-01-01", "person": "John"},
-    ]

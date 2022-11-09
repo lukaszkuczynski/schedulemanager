@@ -13,6 +13,7 @@ resource "google_cloudfunctions_function" "function" {
   source_archive_object = google_storage_bucket_object.function_archive.name
   entry_point           = var.entrypoint
   max_instances         = 1
+  available_memory_mb   = var.available_memory_mb
 
 
   event_trigger {
