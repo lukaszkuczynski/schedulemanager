@@ -16,6 +16,10 @@ module "cloudfunction_notifier" {
   additional_variables = {
     MANAGER_TOPIC_NAME   = google_pubsub_topic.manager.name
     GOOGLE_CLOUD_PROJECT = var.google_project_name
+    TWILIO_ACCOUNT_SID   = var.twilio_account_sid
+    TWILIO_AUTH_TOKEN    = var.twilio_auth_token
+    NOTIFIER_FROM        = var.notifier_from
+    NOTIFIER_TO          = var.notifier_to
   }
 }
 
