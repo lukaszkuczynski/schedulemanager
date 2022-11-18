@@ -3,6 +3,7 @@ from google.cloud import pubsub_v1
 import os
 import json
 import base64
+from decisive import Decisive
 
 # Instantiates a Pub/Sub client
 publisher = pubsub_v1.PublisherClient()
@@ -10,19 +11,24 @@ PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 HOLEFINDER_TOPIC_NAME = os.getenv("HOLEFINDER_TOPIC_NAME")
 NOTIFIER_TOPIC_NAME = os.getenv("NOTIFIER_TOPIC_NAME")
 THIS_FUNCTION_CALLER_ID = "schedule_manager"  # envvar it!
+DAYS_AHEAD_CHECK = int(os.getenv("DAYS_AHEAD_CHECK"))
 
 
 def process_acc_to_the_caller(caller, event_data):
-    response = event_data
+    if caller == "hole_finder":
+        decisive = Decisive(DAYS_AHEAD_CHECK)
+        holes_to_notify = decisive.holes_to_notify(event_data)
+        print(f"From this list {event_data} chosen {holes_to_notify} to notify")
+        response = holes_to_notify
+    else:
+        response = event_data
     return response
 
 
 def send_to_topic(topic_name, response):
     topic_path = publisher.topic_path(PROJECT_ID, topic_name)
     message_json = json.dumps(
-        {
-            "data": {"message": response, "caller": THIS_FUNCTION_CALLER_ID},
-        }
+        {"data": {"message": response, "caller": THIS_FUNCTION_CALLER_ID},}
     )
     message_bytes = message_json.encode("utf-8")
     try:

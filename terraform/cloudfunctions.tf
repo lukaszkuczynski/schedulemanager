@@ -38,6 +38,7 @@ module "cloudfunction_manager" {
     MANAGER_TOPIC_NAME    = google_pubsub_topic.manager.name
     GOOGLE_CLOUD_PROJECT  = var.google_project_name
     NOTIFIER_TOPIC_NAME   = google_pubsub_topic.notifier.name
+    DAYS_AHEAD_CHECK      = var.days_ahead_check
   }
 }
 

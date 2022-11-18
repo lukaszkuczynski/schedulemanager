@@ -22,3 +22,7 @@ variable "notifier_from" {
 }
 variable "notifier_to" {
 }
+variable "days_ahead_check" {
+  description = "How many days ahead manager is to check whether to send notifications about holes"
+  default     = 7
+}

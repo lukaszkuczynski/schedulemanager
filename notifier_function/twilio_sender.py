@@ -14,5 +14,14 @@ class TwilioSender:
         message = self.client.messages.create(
             from_=self.notifier_from, body=msg, to=self.notifier_to
         )
-        return message.sid
+        return message
 
+
+if __name__ == "__main__":
+    sender = TwilioSender()
+    msg = sender.send_message(
+        """
+        Your package has been shipped. It will be delivered in zcxczczxczx business days.
+        """
+    )
+    print(msg)

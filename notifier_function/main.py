@@ -23,10 +23,10 @@ def entrypoint(nofifier_event):
     print(decoded)
     events = json.loads(decoded)["data"]["message"]
     print(f"events: {events}")
-    msg = design_msg(events)
+    msg = design_msg_approved(events)
     print(f"will send this msg : {msg}")
-    sender.send_message(msg)
-    # call_the_manager(send_notifications())
+    msg_response = sender.send_message(msg)
+    print(msg_response)
 
 
 def call_the_manager(response):
@@ -44,10 +44,18 @@ def call_the_manager(response):
         return (e, 500)
 
 
+def design_msg_approved(holes):
+    shifts_txt = ",".join(holes)
+    message_text = f"""
+    Your package has been shipped. It will be delivered in {shifts_txt} business days.
+    """
+    return message_text
+
+
 def design_msg(holes):
     shifts_txt = ",".join(holes)
     message_text = f"""
-        There are following days where shifts are free. {shifts_txt}
+       The following is the list of free shifts you can take for the period of {{1}}. Days and hours: {{2}}
     """
     return message_text
 
