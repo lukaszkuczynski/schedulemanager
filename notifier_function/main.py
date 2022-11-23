@@ -10,10 +10,11 @@ PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 MANAGER_TOPIC_NAME = os.getenv("MANAGER_TOPIC_NAME")
 THIS_FUNCTION_CALLER_ID = "notifier"  # envvar it!
 
+twilioSender = TwilioSender()
+
 
 @functions_framework.cloud_event
 def entrypoint(nofifier_event):
-    sender = TwilioSender()
     print(
         f"Received event with ID: {nofifier_event['id']} and data {nofifier_event.data}"
     )
@@ -23,10 +24,9 @@ def entrypoint(nofifier_event):
     print(decoded)
     events = json.loads(decoded)["data"]["message"]
     print(f"events: {events}")
-    msg = design_msg_approved(events)
-    print(f"will send this msg : {msg}")
-    msg_response = sender.send_message(msg)
-    print(msg_response)
+    # send_test_message()
+    result = send_all_messages(events)
+    return result
 
 
 def call_the_manager(response):
@@ -42,6 +42,26 @@ def call_the_manager(response):
     except Exception as e:
         print(e)
         return (e, 500)
+
+
+def send_test_message():
+    msg_text = """hello dear Participant 111,
+this is the list of your shifts from the upcoming schedule 2222.
+Please verify with the main program and add to your calendar.
+Enjoy!"""
+    whatsapp_no = os.getenv("NOTIFIER_TO")
+    msg_response = twilioSender.send_message_to(msg_text, whatsapp_no)
+    print(msg_response)
+
+
+def send_all_messages(messages):
+    for msg in messages:
+        print(f"will send this msg : {msg}")
+        msg_text = msg["message_text"]
+        whatsapp_no = msg["whatsapp_no"]
+        msg_response = twilioSender.send_message_to(msg_text, whatsapp_no)
+        print(msg_response)
+    return 0
 
 
 def design_msg_approved(holes):

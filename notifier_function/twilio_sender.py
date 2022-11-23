@@ -10,9 +10,10 @@ class TwilioSender:
         self.notifier_to = os.getenv("NOTIFIER_TO")
         self.client = Client(account_sid, auth_token)
 
-    def send_message(self, msg):
+    def send_message_to(self, msg, to_number):
+        number_with_channel = f"whatsapp:{to_number}"
         message = self.client.messages.create(
-            from_=self.notifier_from, body=msg, to=self.notifier_to
+            from_=self.notifier_from, body=msg, to=number_with_channel
         )
         return message
 
