@@ -20,6 +20,7 @@ module "cloudfunction_notifier" {
     TWILIO_AUTH_TOKEN    = var.twilio_auth_token
     NOTIFIER_FROM        = var.notifier_from
     NOTIFIER_TO          = var.notifier_to
+    DRY_RUN_SEND         = var.dry_run_send
   }
 }
 

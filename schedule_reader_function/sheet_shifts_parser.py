@@ -51,7 +51,10 @@ class SheetShiftsParser:
     def parse(self, flat_data):
         df = pd.DataFrame(flat_data)
         corners = self.__get_corners(df)
+        # work smarter here, get some minimum col-row values
+        # analyze ALL corners
         one_day_shape = (corners[2][0] - corners[0][0], corners[1][1] - corners[0][1])
+        one_day_shape = (4, 11)
         small_dataframes = self.__parse_oneday_dataframes(df, corners, one_day_shape)
         entries = self.__get_entries(small_dataframes)
         to_send_list = [

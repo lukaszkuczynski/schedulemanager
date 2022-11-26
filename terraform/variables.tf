@@ -32,3 +32,7 @@ variable "contact_data" {
   description = "contact data json (to be replaced soon)"
   default     = "{}"
 }
+
+variable "dry_run_send" {
+  default = 1
+}

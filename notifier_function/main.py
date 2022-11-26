@@ -9,6 +9,7 @@ publisher = pubsub_v1.PublisherClient()
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
 MANAGER_TOPIC_NAME = os.getenv("MANAGER_TOPIC_NAME")
 THIS_FUNCTION_CALLER_ID = "notifier"  # envvar it!
+DRY_RUN_SEND = int(os.getenv("DRY_RUN_SEND", 1))
 
 twilioSender = TwilioSender()
 
@@ -54,30 +55,21 @@ Enjoy!"""
     print(msg_response)
 
 
+def dry_run_send(msg_text, whatsapp_no):
+    print(f"Dry run send! Sending txt: {msg_text} to whatsapp_no {whatsapp_no}")
+
+
 def send_all_messages(messages):
     for msg in messages:
         print(f"will send this msg : {msg}")
         msg_text = msg["message_text"]
         whatsapp_no = msg["whatsapp_no"]
-        msg_response = twilioSender.send_message_to(msg_text, whatsapp_no)
-        print(msg_response)
+        if DRY_RUN_SEND == 1:
+            dry_run_send(msg_text, whatsapp_no)
+        else:
+            msg_response = twilioSender.send_message_to(msg_text, whatsapp_no)
+            print(msg_response)
     return 0
-
-
-def design_msg_approved(holes):
-    shifts_txt = ",".join(holes)
-    message_text = f"""
-    Your package has been shipped. It will be delivered in {shifts_txt} business days.
-    """
-    return message_text
-
-
-def design_msg(holes):
-    shifts_txt = ",".join(holes)
-    message_text = f"""
-       The following is the list of free shifts you can take for the period of {{1}}. Days and hours: {{2}}
-    """
-    return message_text
 
 
 def send_notifications():

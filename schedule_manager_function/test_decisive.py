@@ -13,7 +13,6 @@ def test_decisive_should_select():
             "2022-10-22 15:00__???",
         ]
         notify_holes = decisive.holes_to_notify(hole_msg)
-        print(notify_holes)
         assert len(notify_holes) == 2
 
 

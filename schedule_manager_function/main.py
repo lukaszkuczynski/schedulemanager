@@ -26,6 +26,7 @@ def merge_shifts_with_contact_data(event_data, contacts):
 
 
 def log_unreacheable_recipients(shifts_enriched):
+    print("These shifts were not reachable - no phone number found for them")
     print(shifts_enriched)
 
 

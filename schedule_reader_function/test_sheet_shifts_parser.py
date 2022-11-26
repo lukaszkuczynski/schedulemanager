@@ -1,5 +1,5 @@
 import pytest
-from test_data import test_shifts_flat_data
+from test_proddata import test_shifts_flat_data
 from sheet_shifts_parser import SheetShiftsParser
 
 

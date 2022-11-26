@@ -15,10 +15,12 @@ def string_from_contact_data(contact_dict):
 
 
 shifts_data = [
+    "2020-10-08 10:00__John",
     "2020-10-10 10:00__John",
     "2020-10-10 11:00__Mark",
     "2020-10-10 12:00__John",
     "2020-10-10 13:00__Frank",
+    "2020-10-10 09:00__John",
 ]
 
 contact_data = {"John": "+48100100", "Mark": "+48200200"}
@@ -31,9 +33,8 @@ def test_helper_should_match():
     merged = helper.merge_shifts(shifts_data)
     del os.environ[tmp_name]
     assert merged[0]["phone_no"] == "+48100100"
-    assert merged[1]["phone_no"] == "+48200200"
-    assert merged[2]["phone_no"] == "+48100100"
-    assert merged[3]["phone_no"] is None
+    assert merged[2]["phone_no"] == "+48200200"
+    assert merged[4]["phone_no"] is None
 
 
 def test_helper_should_compact():
@@ -41,8 +42,25 @@ def test_helper_should_compact():
     os.environ[tmp_name] = string_from_contact_data(contact_data)
     helper = EnvVarContactsHelper(tmp_name)
     compacted_dict = helper.compact_shifts(shifts_data)
-    print(compacted_dict)
     assert len(compacted_dict) == 3
+    del os.environ[tmp_name]
+
+
+def name_dict_from_compacted_list(compacted_dict):
+    return {el["name"]: el for el in compacted_dict}
+
+
+def test_compact_should_have_times_sorted_asc():
+    tmp_name = randomword(20)
+    os.environ[tmp_name] = string_from_contact_data(contact_data)
+    helper = EnvVarContactsHelper(tmp_name)
+    compacted_dict = helper.compact_shifts(shifts_data)
+    name_dict = name_dict_from_compacted_list(compacted_dict)
+    johns_shifts = name_dict["John"]["shifts"]
+    assert johns_shifts[0] == "[Thu] Oct 08, 10 AM"
+    assert johns_shifts[1] == "[Sat] Oct 10, 09 AM"
+    assert johns_shifts[2] == "[Sat] Oct 10, 10 AM"
+    assert johns_shifts[3] == "[Sat] Oct 10, 12 PM"
     del os.environ[tmp_name]
 
 

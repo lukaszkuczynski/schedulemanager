@@ -1,6 +1,10 @@
 import os
 import json
 from collections import defaultdict
+from datetime import datetime
+
+INPUT_DATETIME_FORMAT = "%Y-%m-%d %H:%M"
+OUTPUT_DATETIME_FORMAT = "[%a] %b %d, %I %p"
 
 
 class EnvVarContactsHelper:
@@ -20,18 +24,29 @@ class EnvVarContactsHelper:
     def merge_shifts(self, shifts):
         return [self._enrich_shift(shift, self.contact_data) for shift in shifts]
 
+    def _sort_and_format_shifts(self, shifts):
+        dt_list = [
+            datetime.strptime(shift_time_str, INPUT_DATETIME_FORMAT)
+            for shift_time_str in shifts
+        ]
+        dt_list_sorted = sorted(dt_list)
+        return [
+            datetime.strftime(dt_shift, OUTPUT_DATETIME_FORMAT)
+            for dt_shift in dt_list_sorted
+        ]
+
     def compact_shifts(self, shifts):
         enriched = self.merge_shifts(shifts)
         compact_dict = defaultdict(list)
         for shift in enriched:
             compact_dict[shift["name"]].append(shift["shift_datetime"])
         compact_dict_with_numbers = []
-        for key, value in compact_dict.items():
+        for key, shifts in compact_dict.items():
             compact_dict_with_numbers.append(
                 {
                     "name": key,
                     "phone_no": self.contact_data.get(key, ""),
-                    "shifts": value,
+                    "shifts": self._sort_and_format_shifts(shifts),
                 }
             )
         return compact_dict_with_numbers
@@ -55,7 +70,7 @@ class EnvVarContactsHelper:
 
 class MessageDesigner:
     def get_message_for_shift_data(self, shift_data):
-        dates_string = ",".join(shift_data["shifts"])
+        dates_string = ", ".join(shift_data["shifts"])
         message_text = f"""hello dear Participant {shift_data["name"]},
 this is the list of your shifts from the upcoming schedule {dates_string}.
 Please verify with the main program and add to your calendar.
