@@ -67,6 +67,17 @@ class EnvVarContactsHelper:
         ]
         return assigned, unassigned
 
+    def make_hole_notifications(self, hole_data, hole_notified_people):
+        hole_notifications = []
+        for notify_name in hole_notified_people:
+            notify_dict = {
+                "name": notify_name,
+                "phone_no": self.contact_data.get(notify_name, ""),
+                "holes": hole_data,
+            }
+            hole_notifications.append(notify_dict)
+        return hole_notifications
+
 
 class MessageDesigner:
     def get_message_for_shift_data(self, shift_data):
@@ -77,4 +88,29 @@ Please verify with the main program and add to your calendar.
 Enjoy!
 """
         return {"whatsapp_no": shift_data["phone_no"], "message_text": message_text}
+
+    def get_message_for_shift_data(self, shift_data):
+        dates_string = ", ".join(shift_data["shifts"])
+        message_text = f"""hello dear Participant {shift_data["name"]},
+this is the list of your shifts from the upcoming schedule {dates_string}.
+Please verify with the main program and add to your calendar.
+Enjoy!
+"""
+        return {"whatsapp_no": shift_data["phone_no"], "message_text": message_text}
+
+    def get_message_for_hole(self, hole_data):
+        dates_string = ", ".join(hole_data["holes"])
+        period = "the following days"
+        message_text = f"""Hi {hole_data["name"]},
+The following is the list of free shifts you can take for the period of {period}. 
+Days and hours are as follows {dates_string}. Please check the main schedule.
+"""
+        return {"whatsapp_no": hole_data["phone_no"], "message_text": message_text}
+
+    def get_message_for_hole_temp(self, hole_data):
+        dates_string = ", ".join(hole_data["holes"])
+        name = hole_data["name"]
+        message_text = f"""Your package has been shipped. It will be delivered in {name}{dates_string} business days.
+"""
+        return {"whatsapp_no": hole_data["phone_no"], "message_text": message_text}
 

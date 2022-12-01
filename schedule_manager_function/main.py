@@ -1,20 +1,16 @@
 import functions_framework
-from google.cloud import pubsub_v1
-import os
-import json
-import base64
 from decisive import Decisive
 from contacts_helper import EnvVarContactsHelper, MessageDesigner
+from schedule_function_common import get_required_env_var, CommsHelper
 
-# Instantiates a Pub/Sub client
-publisher = pubsub_v1.PublisherClient()
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
-HOLEFINDER_TOPIC_NAME = os.getenv("HOLEFINDER_TOPIC_NAME")
-NOTIFIER_TOPIC_NAME = os.getenv("NOTIFIER_TOPIC_NAME")
+PROJECT_ID = get_required_env_var("GOOGLE_CLOUD_PROJECT")
+HOLEFINDER_TOPIC_NAME = get_required_env_var("HOLEFINDER_TOPIC_NAME")
+NOTIFIER_TOPIC_NAME = get_required_env_var("NOTIFIER_TOPIC_NAME")
 THIS_FUNCTION_CALLER_ID = "schedule_manager"  # envvar it!
-DAYS_AHEAD_CHECK = int(os.getenv("DAYS_AHEAD_CHECK"))
+DAYS_AHEAD_CHECK = int(get_required_env_var("DAYS_AHEAD_CHECK"))
 # TODO: move it to some nosql ?
-CONTACT_DATA = os.getenv("CONTACT_DATA")
+CONTACT_DATA = get_required_env_var("CONTACT_DATA")
+HOLE_NOTIFIED_PEOPLE = get_required_env_var("HOLE_NOTIFIED_PEOPLE")
 contacts_helper = EnvVarContactsHelper("CONTACT_DATA")
 message_designer = MessageDesigner()
 
@@ -31,12 +27,20 @@ def log_unreacheable_recipients(shifts_enriched):
 
 
 def process_acc_to_the_caller(flow, caller, event_data):
-    if flow is None:
+    if flow == "FIND_HOLES":
         if caller == "hole_finder":
             decisive = Decisive(DAYS_AHEAD_CHECK)
             holes_to_notify = decisive.holes_to_notify(event_data)
             print(f"From this list {event_data} chosen {holes_to_notify} to notify")
-            response = holes_to_notify
+            hole_notified_people = HOLE_NOTIFIED_PEOPLE.split(",")
+            hole_notifications = contacts_helper.make_hole_notifications(
+                holes_to_notify, hole_notified_people
+            )
+            all_notifications = [
+                message_designer.get_message_for_hole_temp(notify)
+                for notify in hole_notifications
+            ]
+            response = all_notifications
         else:
             response = event_data
         return response
@@ -56,53 +60,28 @@ def process_acc_to_the_caller(flow, caller, event_data):
             return all_notifications
 
 
-def send_to_topic(topic_name, response):
-    topic_path = publisher.topic_path(PROJECT_ID, topic_name)
-    message_json = json.dumps(
-        {"data": {"message": response, "caller": THIS_FUNCTION_CALLER_ID},}
-    )
-    message_bytes = message_json.encode("utf-8")
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_result = publish_future.result()  # Verify the publish succeeded
-        print(publish_result)
-        return "Message published."
-    except Exception as e:
-        print(e)
-        return (e, 500)
-
-
-def parse_the_response(event):
-    print(f"Received event with ID: {event['id']} and data {event.data}")
-    data_parsed = json.loads(base64.b64decode(event.data["message"]["data"]).decode())
-    print(data_parsed)
-    data = data_parsed.get("data")
-    message = data.get("message")
-    caller = data.get("caller")
-    flow = data.get("flow")
-    return caller, message, flow
-
-
 def log_the_flow_end(flow, response):
     print(f"The flow '{flow}' has ended")
 
 
 @functions_framework.cloud_event
 def entrypoint(manager_event):
-    caller, message, flow = parse_the_response(manager_event)
-    if flow is None:
+    comms = CommsHelper(PROJECT_ID, THIS_FUNCTION_CALLER_ID)
+
+    caller, message, flow = comms.parse_the_response(manager_event)
+    if flow == "FIND_HOLES":
         if caller == "schedule_reader":
             response = process_acc_to_the_caller(flow, caller, message)
-            send_to_topic(HOLEFINDER_TOPIC_NAME, response)
+            comms.send_to_topic(HOLEFINDER_TOPIC_NAME, flow, response)
         elif caller == "hole_finder":
             response = process_acc_to_the_caller(flow, caller, message)
-            send_to_topic(NOTIFIER_TOPIC_NAME, response)
+            comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, response)
         else:
             print(f"no caller identified : {caller}")
     elif flow == "SEND_TO_RECIPIENTS":
         if caller == "schedule_reader":
             response = process_acc_to_the_caller(flow, caller, message)
-            send_to_topic(NOTIFIER_TOPIC_NAME, response)
+            comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, response)
         elif caller == "notifier":
             response = process_acc_to_the_caller(flow, caller, message)
             log_the_flow_end(flow, response)

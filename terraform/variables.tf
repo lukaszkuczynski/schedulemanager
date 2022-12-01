@@ -36,3 +36,8 @@ variable "contact_data" {
 variable "dry_run_send" {
   default = 1
 }
+
+variable "hole_notified_people" {
+  description = "comma separated list of names notified about holes"
+  default     = ""
+}

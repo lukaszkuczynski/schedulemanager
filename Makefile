@@ -5,10 +5,14 @@ echo:
 
 package:
 	rm -f *.zip 
-	cd schedule_reader_function && zip -r ../schedule_reader_function.zip main.py sheet_shifts_parser.py requirements.txt
-	cd hole_finder_function && zip -r ../hole_finder_function.zip main.py hole_detector.py requirements.txt
-	cd schedule_manager_function && zip -r ../schedule_manager_function.zip main.py decisive.py contacts_helper.py requirements.txt
-	cd notifier_function && zip -r ../notifier_function.zip main.py twilio_sender.py requirements.txt
+	cp common_libs/schedule_function_common.py schedule_reader_function/
+	cp common_libs/schedule_function_common.py hole_finder_function/
+	cp common_libs/schedule_function_common.py schedule_manager_function/
+	cp common_libs/schedule_function_common.py notifier_function/
+	cd schedule_reader_function && zip -r ../schedule_reader_function.zip main.py sheet_shifts_parser.py requirements.txt schedule_function_common.py 
+	cd hole_finder_function && zip -r ../hole_finder_function.zip main.py hole_detector.py requirements.txt schedule_function_common.py 
+	cd schedule_manager_function && zip -r ../schedule_manager_function.zip main.py decisive.py contacts_helper.py requirements.txt schedule_function_common.py 
+	cd notifier_function && zip -r ../notifier_function.zip main.py twilio_sender.py requirements.txt schedule_function_common.py
 
 apply: package
 	cd terraform && terraform apply -auto-approve -var-file="${workspace}.tfvars"
@@ -16,6 +20,7 @@ apply: package
 taint:
 	cd terraform && terraform taint module.cloudfunction_manager.google_cloudfunctions_function.function
 	# cd terraform && terraform taint module.cloudfunction_reader.google_cloudfunctions_function.function
+	# cd terraform && terraform taint module.cloudfunction_finder.google_cloudfunctions_function.function
 	# cd terraform && terraform taint module.cloudfunction_notifier.google_cloudfunctions_function.function
 	
 logs:

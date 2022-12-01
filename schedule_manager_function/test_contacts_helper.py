@@ -1,4 +1,4 @@
-from contacts_helper import EnvVarContactsHelper
+from contacts_helper import EnvVarContactsHelper, MessageDesigner
 import os
 import random, string
 import json
@@ -74,4 +74,28 @@ def test_filter_compact_by_number_by_assigned_and_not():
     )
     assert len(assigned) == 2
     assert len(unassigned) == 1
+    del os.environ[tmp_name]
+
+
+chosen_hole_data = ["2020-10-08 10:00", "2020-10-10 10:00"]
+
+
+def test_hole_notifications_are_created():
+    tmp_name = randomword(20)
+    os.environ[tmp_name] = string_from_contact_data(contact_data)
+    helper = EnvVarContactsHelper(tmp_name)
+    notifys = helper.make_hole_notifications(chosen_hole_data, ["John", "John"])
+    assert len(notifys) == 2
+    del os.environ[tmp_name]
+
+
+def test_hole_messages_are_created():
+    tmp_name = randomword(20)
+    os.environ[tmp_name] = string_from_contact_data(contact_data)
+    helper = EnvVarContactsHelper(tmp_name)
+    messageDesigner = MessageDesigner()
+    notifys = helper.make_hole_notifications(chosen_hole_data, ["John", "Mark"])
+    msg = messageDesigner.get_message_for_hole_temp(notifys[0])
+    msg2 = messageDesigner.get_message_for_hole_temp(notifys[1])
+    print(msg2)
     del os.environ[tmp_name]

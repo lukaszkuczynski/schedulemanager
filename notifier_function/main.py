@@ -1,48 +1,24 @@
 import functions_framework
-import base64
 import os
-import json
-from google.cloud import pubsub_v1
 from twilio_sender import TwilioSender
 
-publisher = pubsub_v1.PublisherClient()
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT")
-MANAGER_TOPIC_NAME = os.getenv("MANAGER_TOPIC_NAME")
+from schedule_function_common import get_required_env_var, CommsHelper
+
+PROJECT_ID = get_required_env_var("GOOGLE_CLOUD_PROJECT")
+MANAGER_TOPIC_NAME = get_required_env_var("MANAGER_TOPIC_NAME")
 THIS_FUNCTION_CALLER_ID = "notifier"  # envvar it!
-DRY_RUN_SEND = int(os.getenv("DRY_RUN_SEND", 1))
+DRY_RUN_SEND = int(get_required_env_var("DRY_RUN_SEND", 1))
 
 twilioSender = TwilioSender()
 
 
 @functions_framework.cloud_event
-def entrypoint(nofifier_event):
-    print(
-        f"Received event with ID: {nofifier_event['id']} and data {nofifier_event.data}"
-    )
-    print("decoding")
-    decoded = base64.b64decode(nofifier_event.data["message"]["data"]).decode()
-    print("Hello, " + decoded + "!")
-    print(decoded)
-    events = json.loads(decoded)["data"]["message"]
-    print(f"events: {events}")
-    # send_test_message()
-    result = send_all_messages(events)
+def entrypoint(notifier_event):
+    comms = CommsHelper(PROJECT_ID, THIS_FUNCTION_CALLER_ID, MANAGER_TOPIC_NAME)
+    caller, message, flow = comms.parse_the_response(notifier_event)
+    send_result = send_all_messages(message)
+    result = comms.call_the_manager(flow, send_result)
     return result
-
-
-def call_the_manager(response):
-    topic_path = publisher.topic_path(PROJECT_ID, MANAGER_TOPIC_NAME)
-    message_json = json.dumps(
-        {"data": {"message": response, "caller": THIS_FUNCTION_CALLER_ID},}
-    )
-    message_bytes = message_json.encode("utf-8")
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publish succeeded
-        return "Message published."
-    except Exception as e:
-        print(e)
-        return (e, 500)
 
 
 def send_test_message():
@@ -50,7 +26,7 @@ def send_test_message():
 this is the list of your shifts from the upcoming schedule 2222.
 Please verify with the main program and add to your calendar.
 Enjoy!"""
-    whatsapp_no = os.getenv("NOTIFIER_TO")
+    whatsapp_no = get_required_env_var("NOTIFIER_TO")
     msg_response = twilioSender.send_message_to(msg_text, whatsapp_no)
     print(msg_response)
 
@@ -70,8 +46,3 @@ def send_all_messages(messages):
             msg_response = twilioSender.send_message_to(msg_text, whatsapp_no)
             print(msg_response)
     return 0
-
-
-def send_notifications():
-    result = "OK"
-    return result
