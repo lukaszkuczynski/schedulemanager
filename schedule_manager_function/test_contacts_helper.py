@@ -96,5 +96,17 @@ def test_hole_messages_are_created():
     messageDesigner = MessageDesigner()
     notifys = helper.make_hole_notifications(chosen_hole_data, ["John", "Mark"])
     msg2 = messageDesigner.get_message_for_hole(notifys[1], 7)
-    print(msg2)
+    assert msg2 is not None
+    del os.environ[tmp_name]
+
+
+def test_hole_notifications_are_created_when_user_not_found():
+    tmp_name = randomword(20)
+    os.environ[tmp_name] = string_from_contact_data(contact_data)
+    helper = EnvVarContactsHelper(tmp_name)
+    notifys = helper.make_hole_notifications(chosen_hole_data, ["Joh", "John"])
+    assigned, unassigned = helper.filter_compact_by_number_by_assigned_and_not(notifys)
+    print(assigned)
+    assert len(assigned) == 1
+    assert len(unassigned) == 1
     del os.environ[tmp_name]

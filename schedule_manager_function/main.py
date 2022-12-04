@@ -38,12 +38,20 @@ def process_acc_to_the_caller(flow, caller, event_data):
                 response = None
             else:
                 hole_notified_people = HOLE_NOTIFIED_PEOPLE.split(",")
+                # TODO: add alerting validation to filter out not found people names
                 hole_notifications = contacts_helper.make_hole_notifications(
                     holes_to_notify, hole_notified_people
                 )
+                (
+                    assigned,
+                    unassigned,
+                ) = contacts_helper.filter_compact_by_number_by_assigned_and_not(
+                    hole_notifications
+                )
+                log_unreacheable_recipients(unassigned)
                 all_notifications = [
                     message_designer.get_message_for_hole(notify, DAYS_AHEAD_CHECK)
-                    for notify in hole_notifications
+                    for notify in assigned
                 ]
                 response = all_notifications
         else:

@@ -1,7 +1,7 @@
 resource "google_cloud_scheduler_job" "job" {
   name        = "run_hole_finder"
   description = "Job that runs manager daily"
-  schedule    = "0 21 * * 0,3"
+  schedule    = "15 21 * * 0,3"
   time_zone   = "Europe/Warsaw"
 
 
