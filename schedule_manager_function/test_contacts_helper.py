@@ -95,7 +95,6 @@ def test_hole_messages_are_created():
     helper = EnvVarContactsHelper(tmp_name)
     messageDesigner = MessageDesigner()
     notifys = helper.make_hole_notifications(chosen_hole_data, ["John", "Mark"])
-    msg = messageDesigner.get_message_for_hole_temp(notifys[0])
-    msg2 = messageDesigner.get_message_for_hole_temp(notifys[1])
+    msg2 = messageDesigner.get_message_for_hole(notifys[1], 7)
     print(msg2)
     del os.environ[tmp_name]

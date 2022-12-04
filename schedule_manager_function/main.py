@@ -32,15 +32,20 @@ def process_acc_to_the_caller(flow, caller, event_data):
             decisive = Decisive(DAYS_AHEAD_CHECK)
             holes_to_notify = decisive.holes_to_notify(event_data)
             print(f"From this list {event_data} chosen {holes_to_notify} to notify")
-            hole_notified_people = HOLE_NOTIFIED_PEOPLE.split(",")
-            hole_notifications = contacts_helper.make_hole_notifications(
-                holes_to_notify, hole_notified_people
-            )
-            all_notifications = [
-                message_designer.get_message_for_hole_temp(notify)
-                for notify in hole_notifications
-            ]
-            response = all_notifications
+            if len(holes_to_notify) == 0:
+                print("No holes to notify today...")
+                # TODO: think about sth nicer, abort type of msg and send to group of admins
+                response = None
+            else:
+                hole_notified_people = HOLE_NOTIFIED_PEOPLE.split(",")
+                hole_notifications = contacts_helper.make_hole_notifications(
+                    holes_to_notify, hole_notified_people
+                )
+                all_notifications = [
+                    message_designer.get_message_for_hole(notify, DAYS_AHEAD_CHECK)
+                    for notify in hole_notifications
+                ]
+                response = all_notifications
         else:
             response = event_data
         return response
@@ -75,7 +80,8 @@ def entrypoint(manager_event):
             comms.send_to_topic(HOLEFINDER_TOPIC_NAME, flow, response)
         elif caller == "hole_finder":
             response = process_acc_to_the_caller(flow, caller, message)
-            comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, response)
+            if response:
+                comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, response)
         else:
             print(f"no caller identified : {caller}")
     elif flow == "SEND_TO_RECIPIENTS":

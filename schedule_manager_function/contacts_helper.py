@@ -73,7 +73,7 @@ class EnvVarContactsHelper:
             notify_dict = {
                 "name": notify_name,
                 "phone_no": self.contact_data.get(notify_name, ""),
-                "holes": hole_data,
+                "holes": self._sort_and_format_shifts(hole_data),
             }
             hole_notifications.append(notify_dict)
         return hole_notifications
@@ -98,10 +98,10 @@ Enjoy!
 """
         return {"whatsapp_no": shift_data["phone_no"], "message_text": message_text}
 
-    def get_message_for_hole(self, hole_data):
+    def get_message_for_hole(self, hole_data, days_ahead_check):
         dates_string = ", ".join(hole_data["holes"])
-        period = "the following days"
-        message_text = f"""Hi {hole_data["name"]},
+        period = f"{days_ahead_check} days"
+        message_text = f"""Hi {hole_data["name"]}, 
 The following is the list of free shifts you can take for the period of {period}. 
 Days and hours are as follows {dates_string}. Please check the main schedule.
 """
