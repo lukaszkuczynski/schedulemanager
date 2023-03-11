@@ -1,6 +1,6 @@
 runtime: python39
 
-service: schedulemanager
+service: scheduler
 
 handlers:
   - url: /static
