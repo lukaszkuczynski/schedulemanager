@@ -19,19 +19,63 @@
 
 <head>
     <title>Datastore and Firebase Auth Example of Kuczasso</title>
+    <script src="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+
+
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.4.0/firebase-ui-auth.css" />
 </head>
 
 <body>
 
     <h1>Datastore and Firebase Auth Example of Kuczasso</h1>
 
-    <h2>Last 10 visits</h2>
-    {% for time in times %}
-    <p>{{ time['timestamp'] }}</p>
-    {% endfor %}
+    <div id="firebaseui-auth-container"></div>
 
+    <button id="sign-out" hidden=true>Sign Out</button>
+
+    <div id="login-info" hidden=true>
+        <h2>Login info:</h2>
+        {% if user_data %}
+        <dl>
+            <dt>Name</dt>
+            <dd>{{ user_data['name'] }}</dd>
+            <dt>Email</dt>
+            <dd>{{ user_data['email'] }}</dd>
+            <dt>Last 10 visits</dt>
+            <dd>
+                {% for time in times %}
+                <p>{{ time['timestamp'] }}</p>
+                {% endfor %}
+            </dd>
+        </dl>
+        {% elif error_message %}
+        <p>Error: {{ error_message }}</p>
+        {% endif %}
+    </div>
+
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
+
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAA5CiwsjyXMJu4aZgSJQeCUtHLnuERCSY",
+            authDomain: "wroeng.firebaseapp.com",
+            projectId: "wroeng",
+            storageBucket: "wroeng.appspot.com",
+            messagingSenderId: "121830867717",
+            appId: "1:121830867717:web:03c45b59cc1bee1cea6d6c"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </body>
 
 </html>
