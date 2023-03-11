@@ -11,6 +11,7 @@ DAYS_AHEAD_CHECK = int(get_required_env_var("DAYS_AHEAD_CHECK"))
 # TODO: move it to some nosql ?
 CONTACT_DATA = get_required_env_var("CONTACT_DATA")
 HOLE_NOTIFIED_PEOPLE = get_required_env_var("HOLE_NOTIFIED_PEOPLE")
+SHIFT_RECORDED_TOPIC_NAME = get_required_env_var("SHIFT_RECORDER_TOPIC_NAME")
 contacts_helper = EnvVarContactsHelper("CONTACT_DATA")
 message_designer = MessageDesigner()
 
@@ -22,7 +23,7 @@ def merge_shifts_with_contact_data(event_data, contacts):
 
 
 def log_unreacheable_recipients(shifts_enriched):
-    print("These shifts were not reachable - no phone number found for them")
+    print("These shifts were not reachable - no phone number or email found for them")
     print(shifts_enriched)
 
 
@@ -66,11 +67,13 @@ def process_acc_to_the_caller(flow, caller, event_data):
             ) = contacts_helper.filter_compact_by_number_by_assigned_and_not(
                 shifts_compacted
             )
-            log_unreacheable_recipients(unassigned)
+            log_unreacheable_recipients(
+                unassigned
+            )  # TODO: break if unreachably? send msg to admin?
             all_notifications = [
                 message_designer.get_message_for_shift_data(shift) for shift in assigned
             ]
-            return all_notifications
+            return all_notifications, shifts_compacted
 
 
 def log_the_flow_end(flow, response):
@@ -94,8 +97,11 @@ def entrypoint(manager_event):
             print(f"no caller identified : {caller}")
     elif flow == "SEND_TO_RECIPIENTS":
         if caller == "schedule_reader":
-            response = process_acc_to_the_caller(flow, caller, message)
-            comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, response)
+            all_notifications, shifts_compacted = process_acc_to_the_caller(
+                flow, caller, message
+            )
+            comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, all_notifications)
+            # comms.send_to_topic(SHIFT_RECORDED_TOPIC_NAME, flow, shifts_compacted)
         elif caller == "notifier":
             response = process_acc_to_the_caller(flow, caller, message)
             log_the_flow_end(flow, response)

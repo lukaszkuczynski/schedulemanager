@@ -1,0 +1,47 @@
+{
+    "data": {
+        "message": [
+            {
+                "name": "John",
+                "phone_no": "+48100100",
+                "email": "john@a.pl",
+                "shifts": [
+                    "[Thu] Oct 08, 10 AM",
+                    "[Sat] Oct 10, 09 AM",
+                    "[Sat] Oct 10, 10 AM",
+                    "[Sat] Oct 10, 12 PM"
+                ],
+                "shifts_no_format": [
+                    "2020-10-08 10:00",
+                    "2020-10-10 09:00",
+                    "2020-10-10 10:00",
+                    "2020-10-10 12:00"
+                ]
+            },
+            {
+                "name": "Mark",
+                "phone_no": "+48200200",
+                "email": "mark@a.pl",
+                "shifts": [
+                    "[Sat] Oct 10, 11 AM"
+                ],
+                "shifts_no_format": [
+                    "2020-10-10 11:00"
+                ]
+            },
+            {
+                "name": "Frank",
+                "phone_no": null,
+                "email": null,
+                "shifts": [
+                    "[Sat] Oct 10, 01 PM"
+                ],
+                "shifts_no_format": [
+                    "2020-10-10 13:00"
+                ]
+            }
+        ],
+        "caller": "schedule_manager",
+        "flow": "SEND_TO_RECIPIENTS"
+    }
+}

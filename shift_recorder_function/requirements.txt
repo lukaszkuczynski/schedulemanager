@@ -1,0 +1,4 @@
+functions-framework==3.*
+google-cloud-pubsub>=0.28.1
+google-cloud-datastore==2.7.1
+icalendar==5.*

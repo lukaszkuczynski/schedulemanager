@@ -23,7 +23,7 @@ shifts_data = [
     "2020-10-10 09:00__John",
 ]
 
-contact_data = {"John": "+48100100", "Mark": "+48200200"}
+contact_data = {"John": "+48100100|john@a.pl", "Mark": "+48200200|mark@a.pl"}
 
 
 def test_helper_should_match():
@@ -37,12 +37,37 @@ def test_helper_should_match():
     assert merged[4]["phone_no"] is None
 
 
-def test_helper_should_compact():
+def test_helper_should_match_emails():
+    tmp_name = randomword(20)
+    os.environ[tmp_name] = string_from_contact_data(contact_data)
+    helper = EnvVarContactsHelper(tmp_name)
+    merged = helper.merge_shifts(shifts_data)
+    del os.environ[tmp_name]
+    assert merged[0]["email"] == "john@a.pl"
+    assert merged[2]["email"] == "mark@a.pl"
+    assert merged[4]["email"] is None
+
+
+def test_helper_should_compact_with_phone():
     tmp_name = randomword(20)
     os.environ[tmp_name] = string_from_contact_data(contact_data)
     helper = EnvVarContactsHelper(tmp_name)
     compacted_dict = helper.compact_shifts(shifts_data)
     assert len(compacted_dict) == 3
+    first_compact = compacted_dict[0]
+    assert first_compact["phone_no"] == "+48100100"
+    del os.environ[tmp_name]
+
+
+def test_helper_should_compact_with_email():
+    tmp_name = randomword(20)
+    os.environ[tmp_name] = string_from_contact_data(contact_data)
+    helper = EnvVarContactsHelper(tmp_name)
+    compacted_dict = helper.compact_shifts(shifts_data)
+    print(json.dumps(compacted_dict))
+    assert len(compacted_dict) == 3
+    assert compacted_dict[0]["name"] == "John"
+    assert compacted_dict[0]["email"] == "john@a.pl"
     del os.environ[tmp_name]
 
 
@@ -106,7 +131,6 @@ def test_hole_notifications_are_created_when_user_not_found():
     helper = EnvVarContactsHelper(tmp_name)
     notifys = helper.make_hole_notifications(chosen_hole_data, ["Joh", "John"])
     assigned, unassigned = helper.filter_compact_by_number_by_assigned_and_not(notifys)
-    print(assigned)
     assert len(assigned) == 1
     assert len(unassigned) == 1
     del os.environ[tmp_name]

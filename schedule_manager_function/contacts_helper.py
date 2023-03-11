@@ -14,12 +14,26 @@ class EnvVarContactsHelper:
         contacts_string = os.getenv(var_name)
         self.contact_data = json.loads(contacts_string)
 
+    def _get_contact_phone_and_email(self, contact_data, name):
+        phone_no = None
+        email = None
+        if name in contact_data:
+            if len(contact_data.get(name).split("|")) == 2:
+                phone_no = contact_data.get(name).split("|")[0]
+                email = contact_data.get(name).split("|")[1]
+        return phone_no, email
+
     def _enrich_shift(self, shift_str, contact_data):
         shift = shift_str.split("__")
         shift_datetime = shift[0]
         name = shift[1]
-        phone_no = contact_data.get(name)
-        return {"name": name, "shift_datetime": shift_datetime, "phone_no": phone_no}
+        phone_no, email = self._get_contact_phone_and_email(contact_data, name)
+        return {
+            "name": name,
+            "shift_datetime": shift_datetime,
+            "phone_no": phone_no,
+            "email": email,
+        }
 
     def merge_shifts(self, shifts):
         return [self._enrich_shift(shift, self.contact_data) for shift in shifts]
@@ -42,11 +56,14 @@ class EnvVarContactsHelper:
             compact_dict[shift["name"]].append(shift["shift_datetime"])
         compact_dict_with_numbers = []
         for key, shifts in compact_dict.items():
+            phone_no, email = self._get_contact_phone_and_email(self.contact_data, key)
             compact_dict_with_numbers.append(
                 {
                     "name": key,
-                    "phone_no": self.contact_data.get(key, ""),
+                    "phone_no": phone_no,
+                    "email": email,
                     "shifts": self._sort_and_format_shifts(shifts),
+                    "shifts_no_format": sorted(shifts),
                 }
             )
         return compact_dict_with_numbers
