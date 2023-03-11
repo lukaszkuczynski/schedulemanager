@@ -2,15 +2,18 @@ from google.cloud import datastore
 import json
 from datetime import datetime, timedelta
 from icalendar import vCalAddress, vText, Calendar, Event
+from schedule_function_common import get_required_env_var
+from google.cloud import storage
+import hashlib
 
-# from google.cloud import storage
 
-
-client = datastore.Client()
+datastore_client = datastore.Client()
+storage_client = storage.Client()
 
 EVENT_NAME = "Scheduled Shift [automated]"
 INPUT_DATETIME_FORMAT = "%Y-%m-%d %H:%M"
 ORGANIZER_EMAIL = "ORGANIZERR@EMAIL.COM"
+ICS_STORAGE_BUCKET = get_required_env_var("ICS_STORAGE_BUCKET")
 
 
 class ShiftSaver:
@@ -25,12 +28,21 @@ class ShiftSaver:
             shifts = user_data["shifts_no_format"]
             extended_key = f"{username}_{self._get_month()}"
             user_month = datastore.Entity(
-                client.key("schedulemanager_usershift", extended_key)
+                datastore_client.key("schedulemanager_usershift", extended_key)
             )
-            self._create_ics_based_on_shifts(username, email, shifts)
-            user_month.update({"username": username, "email": email, "shifts": shifts})
+            created_ics_filenames = self._create_ics_based_on_shifts(
+                username, email, shifts
+            )
+            user_month.update(
+                {
+                    "username": username,
+                    "email": email,
+                    "shifts": shifts,
+                    "ics": created_ics_filenames,
+                }
+            )
             usermonth_entries.append(user_month)
-        resp = client.put_multi(usermonth_entries)
+        resp = datastore_client.put_multi(usermonth_entries)
         print(resp)
 
     def _create_ics_based_on_shifts(self, name, email, shifts):
@@ -38,7 +50,16 @@ class ShiftSaver:
         created_files_keys = []
         for shift_datehour in dts:
             ics_text = self._create_ics(name, email, shift_datehour)
-            print(ics_text)
+            bucket = storage_client.bucket(ICS_STORAGE_BUCKET)
+            blob_name = hashlib.md5(
+                str(shift_datehour.isoformat() + name).encode()
+            ).hexdigest()
+            blob_fullname = f"{blob_name}.ics"
+            blob = bucket.blob(blob_fullname)
+            with blob.open("wb") as f:
+                f.write(ics_text)
+            created_files_keys.append(blob_fullname)
+        return created_files_keys
 
     def _create_ics(self, name, email, shift_datehour_dt):
         ical = None
