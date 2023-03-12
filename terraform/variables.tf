@@ -41,3 +41,19 @@ variable "hole_notified_people" {
   description = "comma separated list of names notified about holes"
   default     = ""
 }
+
+variable "ics_event_name" {
+  description = "Event to be identified when creating ICS file for a shift in shift_recorder function"
+  default     = ""
+}
+
+variable "ics_organizer_email" {
+  description = "Event's organizer to be identified when creating ICS file for a shift in shift_recorder function"
+  default     = ""
+}
+
+variable "ics_storage_bucket" {
+  description = "Cloud Storage bucket name to store all ICS files for shifts"
+  default     = ""
+}
+

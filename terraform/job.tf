@@ -1,6 +1,6 @@
-resource "google_cloud_scheduler_job" "job" {
+resource "google_cloud_scheduler_job" "job_holes" {
   name        = "run_hole_finder"
-  description = "Job that runs manager daily"
+  description = "Job that runs hole finder daily"
   schedule    = "15 21 * * 0,3"
   time_zone   = "Europe/Warsaw"
 

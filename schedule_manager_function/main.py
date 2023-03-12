@@ -101,7 +101,7 @@ def entrypoint(manager_event):
                 flow, caller, message
             )
             comms.send_to_topic(NOTIFIER_TOPIC_NAME, flow, all_notifications)
-            # comms.send_to_topic(SHIFT_RECORDED_TOPIC_NAME, flow, shifts_compacted)
+            comms.send_to_topic(SHIFT_RECORDED_TOPIC_NAME, flow, shifts_compacted)
         elif caller == "notifier":
             response = process_acc_to_the_caller(flow, caller, message)
             log_the_flow_end(flow, response)

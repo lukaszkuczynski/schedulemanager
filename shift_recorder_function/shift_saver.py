@@ -10,11 +10,11 @@ import hashlib
 datastore_client = datastore.Client()
 storage_client = storage.Client()
 
-EVENT_NAME = "Scheduled Shift [automated]"
+EVENT_NAME = get_required_env_var("ICS_EVENT_NAME")
 INPUT_DATETIME_FORMAT = "%Y-%m-%d %H:%M"
-ORGANIZER_EMAIL = "ORGANIZERR@EMAIL.COM"
+ORGANIZER_EMAIL = get_required_env_var("ICS_ORGANIZER_EMAIL")
 ICS_STORAGE_BUCKET = get_required_env_var("ICS_STORAGE_BUCKET")
-
+DATASTORE_KIND = "schedulemanager_usershift"
 
 class ShiftSaver:
     def _get_month(self):
@@ -28,17 +28,17 @@ class ShiftSaver:
             shifts = user_data["shifts_no_format"]
             extended_key = f"{username}_{self._get_month()}"
             user_month = datastore.Entity(
-                datastore_client.key("schedulemanager_usershift", extended_key)
+                datastore_client.key(DATASTORE_KIND, extended_key)
             )
-            created_ics_filenames = self._create_ics_based_on_shifts(
+            blob_and_shifthour_tuples = self._create_ics_based_on_shifts(
                 username, email, shifts
             )
             user_month.update(
                 {
                     "username": username,
                     "email": email,
-                    "shifts": shifts,
-                    "ics": created_ics_filenames,
+                    "shifts": [tup[0] for tup in blob_and_shifthour_tuples],
+                    "ics": [tup[1] for tup in blob_and_shifthour_tuples],
                 }
             )
             usermonth_entries.append(user_month)
@@ -47,7 +47,7 @@ class ShiftSaver:
 
     def _create_ics_based_on_shifts(self, name, email, shifts):
         dts = [datetime.strptime(dt, INPUT_DATETIME_FORMAT) for dt in shifts]
-        created_files_keys = []
+        blob_and_shifthour_tuples = []
         for shift_datehour in dts:
             ics_text = self._create_ics(name, email, shift_datehour)
             bucket = storage_client.bucket(ICS_STORAGE_BUCKET)
@@ -58,8 +58,8 @@ class ShiftSaver:
             blob = bucket.blob(blob_fullname)
             with blob.open("wb") as f:
                 f.write(ics_text)
-            created_files_keys.append(blob_fullname)
-        return created_files_keys
+            blob_and_shifthour_tuples.append([shift_datehour, blob_fullname])
+        return blob_and_shifthour_tuples
 
     def _create_ics(self, name, email, shift_datehour_dt):
         ical = None

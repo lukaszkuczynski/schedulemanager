@@ -16,6 +16,8 @@ import google.oauth2.id_token
 
 firebase_request_adapter = requests.Request()
 
+DATASTORE_KIND = "schedulemanager_usershift"
+
 
 @app.route("/")
 def root():
@@ -56,11 +58,9 @@ def store_time(email, dt):
 
 def fetch_times(email, limit):
     ancestor = datastore_client.key("User", email)
-    query = datastore_client.query(kind="visit", ancestor=ancestor)
+    query = datastore_client.query(kind="s", ancestor=ancestor)
     query.order = ["-timestamp"]
-
     times = query.fetch(limit=limit)
-
     return times
 
 

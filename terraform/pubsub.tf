@@ -17,3 +17,8 @@ resource "google_pubsub_topic" "reader" {
   name                       = "reader-topic"
   message_retention_duration = "600s"
 }
+
+resource "google_pubsub_topic" "shift_recorder" {
+  name                       = "shift-recorder"
+  message_retention_duration = "600s"
+}
