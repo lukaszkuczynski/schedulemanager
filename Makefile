@@ -19,11 +19,11 @@ apply: package
 	cd terraform && terraform apply -auto-approve -var-file="${workspace}.tfvars"
 
 taint:
-	cd terraform && terraform taint module.cloudfunction_manager.google_cloudfunctions_function.function
+	# cd terraform && terraform taint module.cloudfunction_manager.google_cloudfunctions_function.function
 	# cd terraform && terraform taint module.cloudfunction_reader.google_cloudfunctions_function.function
 	# cd terraform && terraform taint module.cloudfunction_finder.google_cloudfunctions_function.function
 	# cd terraform && terraform taint module.cloudfunction_notifier.google_cloudfunctions_function.function
-	# cd terraform && terraform taint module.cloudfunction_shiftrecorder.google_cloudfunctions_function.function
+	cd terraform && terraform taint module.cloudfunction_shiftrecorder.google_cloudfunctions_function.function
 	
 logs:
 	gcloud functions logs read  schedule-reader-default --limit 10 --start-time '2022-11-09' 

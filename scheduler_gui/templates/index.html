@@ -44,17 +44,21 @@
             <dd>{{ user_data['name'] }}</dd>
             <dt>Email</dt>
             <dd>{{ user_data['email'] }}</dd>
-            <dt>Last 10 visits</dt>
-            <dd>
-                {% for time in times %}
-                <p>{{ time['timestamp'] }}</p>
-                {% endfor %}
-            </dd>
+            <dt>Last VISIT:</dt>
         </dl>
         {% elif error_message %}
         <p>Error: {{ error_message }}</p>
         {% endif %}
     </div>
+
+    <h3>Shifts of yours..</h3>
+    {%if shifts %}
+    <ul>
+        {% for shift in shifts %}
+        <li>{{ shift[0] }} : {{shift[1]}} <a href="{{shift[1]}}">Shift ICS</a> </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
 
 
     <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-app.js"></script>

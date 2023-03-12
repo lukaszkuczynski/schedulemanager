@@ -16,6 +16,7 @@ ORGANIZER_EMAIL = get_required_env_var("ICS_ORGANIZER_EMAIL")
 ICS_STORAGE_BUCKET = get_required_env_var("ICS_STORAGE_BUCKET")
 DATASTORE_KIND = "schedulemanager_usershift"
 
+
 class ShiftSaver:
     def _get_month(self):
         return "202303"  # TODO externalize, this is part of the key
@@ -23,10 +24,15 @@ class ShiftSaver:
     def save_shifts(self, shifts_from_message):
         usermonth_entries = []
         for user_data in shifts_from_message:
-            username = user_data["name"]
             email = user_data["email"]
+            username = user_data["name"]
+            if email is None:
+                print(
+                    f"Detected empty email for username = {username}, for them data will not be stored nor ICS files created"
+                )
+                continue
             shifts = user_data["shifts_no_format"]
-            extended_key = f"{username}_{self._get_month()}"
+            extended_key = f"{email}_{self._get_month()}"
             user_month = datastore.Entity(
                 datastore_client.key(DATASTORE_KIND, extended_key)
             )
@@ -52,7 +58,7 @@ class ShiftSaver:
             ics_text = self._create_ics(name, email, shift_datehour)
             bucket = storage_client.bucket(ICS_STORAGE_BUCKET)
             blob_name = hashlib.md5(
-                str(shift_datehour.isoformat() + name).encode()
+                str(shift_datehour.isoformat() + email).encode()
             ).hexdigest()
             blob_fullname = f"{blob_name}.ics"
             blob = bucket.blob(blob_fullname)
